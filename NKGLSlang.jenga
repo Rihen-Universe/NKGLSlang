@@ -40,7 +40,11 @@ with project("NKGLSlang"):
     # ENABLE_OPT=0 : désactive spirv-tools optimizer (évite la dépendance)
     defines([
         "ENABLE_OPT=0",
-        "ENABLE_HLSL",
+        # ENABLE_HLSL défini VIDE (pas "=1") pour matcher `#define ENABLE_HLSL` (sans
+        # valeur) dans hlslGrammar.cpp/hlslParseHelper.cpp -> redéfinition IDENTIQUE,
+        # pas de -Wmacro-redefined (clang-native/Linux ignore le -Wno-macro-redefined).
+        # `#ifdef ENABLE_HLSL` reste vrai (test de définition, pas de valeur).
+        "ENABLE_HLSL=",
         "GLSLANG_OSINCLUDE_WIN32",        # ignoré sur non-Windows, sans effet
     ])
 
@@ -152,7 +156,12 @@ with project("NKGLSlang"):
     # ==================== Web ====================
     with filter("system:Web"):
         usetoolchain("emscripten")
-        files(["glslang/OSDependent/Web/glslang.js.cpp"])
+        # ossource.cpp = vraie implementation OSDependent (TLS/verrous mono-thread,
+        # requise par InitializeDll.cpp/ShaderLang.cpp). glslang.js.cpp est un
+        # DEMO exportant convert_glsl_to_spirv() en JS (non utilise par NKRHI/NkSL,
+        # qui appellent l'API C++ glslang directement) : il ne fournit PAS les
+        # symboles OS_* -> undefined symbol au link si utilise seul.
+        files(["glslang/OSDependent/Web/ossource.cpp"])
 
     # ==================== Xbox ====================
     with filter("system:XboxSeries || system:XboxOne"):

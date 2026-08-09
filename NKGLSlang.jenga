@@ -152,7 +152,21 @@ with project("NKGLSlang"):
     # ==================== Web ====================
     with filter("system:Web"):
         usetoolchain("emscripten")
-        files(["glslang/OSDependent/Web/glslang.js.cpp"])
+        # `OSDependent/Web/glslang.js.cpp` est la liaison JAVASCRIPT de glslang :
+        # elle ne fournit AUCUNE des fonctions OS (OS_AllocTLSIndex,
+        # OS_DumpMemoryCounters...) que le reste de la bibliotheque appelle. Ici
+        # on produit une bibliotheque STATIQUE a lier dans Nkentseu, pas un module
+        # JS — il faut donc la vraie implementation. Emscripten etant POSIX, c'est
+        # la meme que pour Linux/Android/iOS.
+        files(["glslang/OSDependent/Unix/ossource.cpp"])
+
+    # ==================== HarmonyOS ====================
+    # Sans ce bloc, aucune implementation OSDependent n'est compilee sur cette
+    # plateforme : la bibliotheque se construit, mais tout projet qui la lie
+    # echoue sur des symboles OS_* non resolus. Le NDK OHOS est POSIX.
+    with filter("system:HarmonyOS"):
+        files(["glslang/OSDependent/Unix/ossource.cpp"])
+        buildoptions(["-fPIC"])
 
     # ==================== Xbox ====================
     with filter("system:XboxSeries || system:XboxOne"):

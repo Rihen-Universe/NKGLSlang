@@ -153,6 +153,16 @@ with project("NKGLSlang"):
         files(["glslang/OSDependent/Unix/ossource.cpp"])
         buildoptions(["-fPIC"])
 
+    # ==================== HarmonyOS ====================
+    # Meme implementation OSDependent qu'Android (POSIX/pthread). Sans ce
+    # filtre, aucun ossource.cpp n'etait compile pour HarmonyOS : les symboles
+    # glslang::InitGlobalLock/OS_*TLS* restaient UNDEFINED dans la .so et le
+    # chargement NAPI echouait ("symbol not found" au dlopen du HAP).
+    with filter("system:HarmonyOS"):
+        usetoolchain("ohos-ndk")
+        files(["glslang/OSDependent/Unix/ossource.cpp"])
+        buildoptions(["-fPIC"])
+
     # ==================== Web ====================
     with filter("system:Web"):
         usetoolchain("emscripten")

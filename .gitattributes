@@ -15,3 +15,12 @@
 *.out text eol=lf
 *.conf text eol=lf
 *.err text eol=lf
+
+# Ajout Rihen (2026-08-15). Le « * -text » ci-dessus desactive toute
+# normalisation par defaut, et .jenga n'etait couvert par aucune ligne : un
+# NKGLSlang.jenga reecrit en CRLF s'enregistrait tel quel. Le diff brut
+# annoncait alors 189 lignes ajoutees et 179 supprimees pour un correctif de
+# 10 lignes (le bloc HarmonyOS) — un commit que personne ne peut relire.
+# Les descripteurs Jenga sont lus par Python et compares entre plateformes :
+# LF partout, y compris dans la copie de travail.
+*.jenga text eol=lf
